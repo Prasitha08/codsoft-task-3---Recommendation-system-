@@ -1,0 +1,38 @@
+pip install pandas scikit-learn
+import pandas as pd
+
+movies = pd.DataFrame({
+    'title': [
+        'The Matrix', 'John Wick', 'Interstellar',
+        'The Notebook', 'Inception', 'Titanic'
+    ],
+    'genre': [
+        'Action Sci-Fi', 'Action Thriller', 'Sci-Fi Drama',
+        'Romance Drama', 'Action Sci-Fi', 'Romance Drama'
+    ]
+})
+
+print(movies)
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+vectorizer = CountVectorizer()
+genre_matrix = vectorizer.fit_transform(movies['genre'])
+
+similarity_matrix = cosine_similarity(genre_matrix)
+
+def recommend_movies(movie_title, movies, similarity_matrix):
+    if movie_title not in movies['title'].values:
+        print("Movie not found.")
+        return
+
+    index = movies[movies['title'] == movie_title].index[0]
+    similarity_scores = list(enumerate(similarity_matrix[index]))
+    similarity_scores = sorted(similarity_scores, key=lambda x: x[1], reverse=True)
+    
+    print(f"\nMovies similar to '{movie_title}':")
+    for i, score in similarity_scores[1:4]:  # Top 3 excluding the movie itself
+        print(f"- {movies.iloc[i]['title']} (score: {score:.2f})")
+recommend_movies("The Matrix", movies, similarity_matrix)
+recommend_movies("Titanic", movies, similarity_matrix)
+
